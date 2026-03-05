@@ -1,0 +1,52 @@
+services:
+  keycloak:
+    container_name: keycloak_app
+    image: 10.1.1.4:3000/henryreed/keycloak:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - /var/home/core/keycloak/ssl:/etc/x509/https:Z
+    environment:
+      KEYCLOAK_ADMIN: tempadmin
+      KEYCLOAK_ADMIN_PASSWORD: CHANGEME
+      KC_HOSTNAME: https://keycloak.home.internal
+      KC_DB_URL: jdbc:postgresql://keycloak_postgres:5432/keycloak
+      KC_DB: postgres
+      KC_DB_USERNAME:  postgres
+      KC_DB_PASSWORD: DB_CHANGEME
+      KC_TRUSTSTORE_PATHS: /etc/x509/https/ca.crt
+      X509_CA_BUNDLE: /etc/x509/https/ca.crt
+      KC_SPI_X509CERT_LOOKUP_PROVIDER: rfc9440
+      KC_PROXY: edge
+      KC_HTTP_ENABLED: true
+    depends_on:
+      - keycloak_postgres
+    networks:
+      - keycloak-network
+    command:
+      - 'start'
+
+  keycloak_postgres:
+    container_name: keycloak_postgres
+    image: 10.1.1.4:3000/henryreed/postgres:latest
+    restart: unless-stopped
+    user: "CHANGEME:CHANGEME"
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: DB_CHANGEME-SAME AS ABOVE
+      POSTGRES_PORT: 5432
+    volumes:
+      - /var/home/keycloak/postgres:/var/lib/postgresql/data:Z
+    networks:
+      - keycloak-network
+
+
+networks:
+  keycloak-network:
+    name: keycloak-network
+    driver: bridge
+
+volumes:
+  postgres_data:

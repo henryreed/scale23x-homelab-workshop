@@ -1,0 +1,27 @@
+services:
+  stepca-server:
+    container_name: stepca-server
+    image: docker.io/smallstep/step-ca
+    restart: unless-stopped
+    user: "CHANGEME:CHANGEME"
+    ports:
+      - "1443:9000"
+    volumes:
+      - /var/home/step/server:/home/step:Z
+    environment: #you can remove this entire section after step-ca init
+      - DOCKER_STEPCA_INIT_NAME=Homelab Server CA
+      - DOCKER_STEPCA_INIT_DNS_NAMES=localhost,home.internal
+      - DOCKER_STEPCA_INIT_ACME=true
+  stepca-user:
+    container_name: stepca-user
+    image: docker.io/smallstep/step-ca
+    restart: unless-stopped
+    user: "CHANGEME:CHANGEME"
+    ports:
+      - "2443:9000"
+    volumes:
+      - /var/home/step/user:/home/step:Z
+    environment: #you can remove this entire section after step-ca init
+      - DOCKER_STEPCA_INIT_NAME=Homelab User CA
+      - DOCKER_STEPCA_INIT_DNS_NAMES=localhost,home.internal
+      - DOCKER_STEPCA_INIT_SSH=true

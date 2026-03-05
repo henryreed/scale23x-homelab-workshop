@@ -1,0 +1,69 @@
+# Set OIDC to be the authentication method
+AUTH_METHOD=oidc
+
+# Dump out the details fetched from the identity provider.
+# Only set this option to true if debugging since it will block logins
+# and potentially show private details.
+OIDC_DUMP_USER_DETAILS=false
+
+# Control if BookStack automatically initiates login via your OIDC system 
+# if it's the only authentication method. Prevents the need for the
+# user to click the "Login with x" button on the login page.
+# Setting this to true enables auto-initiation.
+AUTH_AUTO_INITIATE=false
+
+# Set the display name to be shown on the login button.
+# (Login with <name>)
+OIDC_NAME=SSO
+
+# Name of the claims(s) to use for the user's display name.
+# Can have multiple attributes listed, separated with a '|' in which 
+# case those values will be joined with a space.
+# Example: OIDC_DISPLAY_NAME_CLAIMS=given_name|family_name
+OIDC_DISPLAY_NAME_CLAIMS=name
+
+# OAuth Client ID to access the identity provider
+OIDC_CLIENT_ID=abc123
+
+# OAuth Client Secret to access the identity provider
+OIDC_CLIENT_SECRET=def456
+
+# Issuer URL
+# Must start with 'https://'
+OIDC_ISSUER=https://instance.authsystem.example.com
+
+# The "end session" (RP-initiated logout) URL to call during BookStack logout.
+# By default this is false which disables RP-initiated logout.
+# Setting to "true" will enable logout if found as supported by auto-discovery.
+# Otherwise, this can be set as a specific URL endpoint.
+OIDC_END_SESSION_ENDPOINT=false
+
+# Enable fetching of the user's avatar from the 'picture' claim on login.
+# Will only be fetched if the user doesn't already have an avatar image assigned.
+# By default this is false which disables avatar fetching. Set to 'true' to enable.
+# WARNING: This can be a security risk due to performing server-side fetching 
+# (with up to 3 redirects) of data from external URLs. Only enable if you
+# trust the OIDC auth provider to provide safe URLs for user images.
+OIDC_FETCH_AVATAR=false
+
+# Enable auto-discovery of endpoints and token keys.
+# As per the standard, expects the service to serve a 
+# `<issuer>/.well-known/openid-configuration` endpoint.
+OIDC_ISSUER_DISCOVER=true
+
+# Enable OIDC group sync.
+OIDC_USER_TO_GROUPS=true
+
+# Set the attribute from which BookStack will read groups names from.
+OIDC_GROUPS_CLAIM=groups
+
+# Additional scopes to send with the authentication request.
+# By default BookStack only sends the 'openid', 'profile' & 'email' scopes.
+# Many platforms require specific scopes to be requested for group data.
+# Multiple scopes can be added via comma separation.
+OIDC_ADDITIONAL_SCOPES=groups
+
+# Remove the user from roles that don't match OIDC groups upon login.
+# Note: While this is enabled the "Default Registration Role", editable within the 
+# BookStack settings view, will be considered a matched role and assigned to the user.
+OIDC_REMOVE_FROM_GROUPS=true

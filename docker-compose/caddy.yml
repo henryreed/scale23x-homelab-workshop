@@ -1,0 +1,9 @@
+services:
+  caddy:
+    image: 10.1.1.4:3000/henryreed/caddy:latest
+    container_name: caddy
+    volumes:
+      - ./conf:/etc/caddy:Z
+      - ./data:/data:Z
+    network_mode: host
+    restart: unless-stopped

@@ -1,0 +1,41 @@
+services:
+  bookstack:
+    image: 10.1.1.4:3000/henryreed/bookstack:latest
+    container_name: bookstack
+    environment:
+      # Change these to match the UID/GID of your bookstack service
+      # account user if necessary
+      - PUID=1001
+      - PGID=1001
+      # For your own home lab, change this to match your timezone
+      - TZ=America/Los_Angeles
+      - APP_URL=https://bookstack.home.internal
+      - APP_KEY=CHANGEME
+      - DB_HOST=mariadb
+      - DB_PORT=3306
+      - DB_DATABASE=bookstack
+      - DB_USERNAME=bookstack
+      - DB_PASSWORD=CHANGEME
+    volumes:
+      - /var/home/bookstack/appdata:/config:Z
+    ports:
+      - 127.0.0.1:6875:80
+    restart: unless-stopped
+
+  mariadb:
+    image: 10.1.1.4:3000/henryreed/mariadb:latest
+    container_name: mariadb
+    environment:
+      # Change these to match the UID/GID of your bookstack service
+      # account user if necessary
+      - PUID=1001
+      - PGID=1001
+      # For your own home lab, change this to match your timezone
+      - TZ=America/Los_Angeles
+      - MYSQL_ROOT_PASSWORD=CHANGEME
+      - MYSQL_DATABASE=bookstack
+      - MYSQL_USER=bookstack
+      - MYSQL_PASSWORD=CHANGEME SAME AS DB_PASSWORD ABOVE
+    volumes:
+      - /var/home/bookstack/dbdata:/config:Z
+    restart: unless-stopped

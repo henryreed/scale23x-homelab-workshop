@@ -1,0 +1,70 @@
+variant: fcos
+version: 1.4.0
+# You must enter your SSH key below, otherwise you'll be unable to 
+# login to your Fedora CoreOS system
+passwd:
+  users:
+    - name: core
+      ssh_authorized_keys:
+        - #<ENTER YOUR SSH KEY HERE>
+storage:
+  files:
+    - path: /etc/hostname
+      mode: 0644
+      contents:
+        inline: fcos.home.internal
+systemd:
+  units:
+    - name: rpm-ostree-uninstall.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Part of Docker rpm-ostree install
+        Wants=network-online.target
+        After=network-online.target
+        # We run before `zincati.service` to avoid conflicting rpm-ostree
+        # transactions.
+        Before=zincati.service
+        ConditionPathExists=!/var/lib/%N.stamp
+
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/bin/rpm-ostree override remove docker docker-cli containerd runc
+        ExecStart=/bin/touch /var/lib/%N.stamp
+
+        [Install]
+        WantedBy=multi-user.target
+    - name: rpm-ostree-install.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Docker rpm-ostree install
+        Wants=network-online.target
+        Requires=rpm-ostree-uninstall.service
+        After=rpm-ostree-uninstall.service
+        # We run before `zincati.service` to avoid conflicting rpm-ostree
+        # transactions.
+        Before=zincati.service
+        ConditionPathExists=!/var/lib/%N.stamp
+
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        # ExecStart is commented out we want to avoid getting the 
+        # SCaLE IP blocked by repositories for hammering them too 
+        # much. Using local repos, instead.
+        #ExecStart=/usr/bin/curl --output-dir "/etc/yum.repos.d" --remote-name https://download.docker.com/linux/fedora/docker-ce.repo
+        ExecStart=/usr/bin/curl --output-dir "/etc/yum.repos.d" --remote-name http://10.1.1.3/configs/fedora-updates-archive.repo
+        ExecStart=/usr/bin/curl --output-dir "/etc/yum.repos.d" --remote-name http://10.1.1.3/configs/fedora-cisco-openh264.repo
+        ExecStart=/usr/bin/curl --output-dir "/etc/yum.repos.d" --remote-name http://10.1.1.3/configs/docker-ce-fedora-43-x86_64_stable.repo
+        ExecStart=/usr/bin/curl --output-dir "/etc/yum.repos.d" --remote-name http://10.1.1.3/configs/fedora.repo
+        ExecStart=/usr/bin/curl --output-dir "/etc/yum.repos.d" --remote-name http://10.1.1.3/configs/fedora-updates.repo
+        ExecStart=/usr/bin/curl --output-dir "/etc/yum.repos.d" --remote-name http://10.1.1.3/configs/fedora-updates-testing.repo
+        ExecStart=/usr/bin/curl --output-dir "/etc/yum.repos.d" --remote-name http://10.1.1.3/configs/smallstep.repo
+        ExecStart=/usr/bin/rpm-ostree install vim tmux docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+        ExecStart=/usr/bin/touch /var/lib/%N.stamp
+        ExecStart=/usr/bin/systemctl --no-block reboot
+
+        [Install]
+        WantedBy=multi-user.target
